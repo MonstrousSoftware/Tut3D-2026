@@ -1,6 +1,7 @@
 package com.monstrous.tut3d;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Input;
 import com.badlogic.gdx.ScreenAdapter;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.PerspectiveCamera;
@@ -12,6 +13,7 @@ import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
 import com.badlogic.gdx.graphics.g3d.attributes.TextureAttribute;
 import com.badlogic.gdx.graphics.g3d.environment.DirectionalLight;
 import com.badlogic.gdx.graphics.g3d.utils.CameraInputController;
+import com.badlogic.gdx.graphics.g3d.utils.FirstPersonCameraController;
 import com.badlogic.gdx.graphics.g3d.utils.ModelBuilder;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Array;
@@ -19,7 +21,7 @@ import com.badlogic.gdx.utils.ScreenUtils;
 
 public class GameScreen extends ScreenAdapter {
     private PerspectiveCamera cam;
-    private CameraInputController camController;
+    private FirstPersonCameraController camController;
     private Model cubeModel;
     private Model groundModel;
     private ModelInstance cubeInstance;
@@ -34,13 +36,13 @@ public class GameScreen extends ScreenAdapter {
 
         // create camera
         cam = new PerspectiveCamera(67, Gdx.graphics.getWidth(),  Gdx.graphics.getHeight());
-        cam.position.set(10f, 1.5f, 5f);
-        cam.lookAt(0,0,0);
+        cam.position.set(10f, Settings.eyeHeight, 5f);
+        cam.lookAt(0,Settings.eyeHeight,0);
         cam.near = 1f;
         cam.far = 300f;
         cam.update();
 
-        camController = new CameraInputController(cam);
+        camController = new FirstPersonCameraController(cam);
         Gdx.input.setInputProcessor(camController);
 
         modelBatch = new ModelBatch();
@@ -74,10 +76,15 @@ public class GameScreen extends ScreenAdapter {
         environment = new Environment();
         environment.set(new ColorAttribute(ColorAttribute.AmbientLight, 0.2f, 0.2f, 0.2f, 1f));
         environment.add(new DirectionalLight().setColor(0.5f, 0.5f, 0.5f, 1.0f).setDirection(-0.3f, -0.8f, -0.2f));
+
+        Gdx.input.setCursorCatched(true);
+        Gdx.input.setCursorPosition(Gdx.graphics.getWidth()/2, Gdx.graphics.getHeight()/2);
     }
 
     @Override
     public void render(float delta) {
+        if(Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE))
+            Gdx.app.exit();
         camController.update();
 
         // Draw your screen here. "delta" is the time since last render in seconds.
