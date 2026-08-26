@@ -4,21 +4,29 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.ScreenAdapter;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.PerspectiveCamera;
+import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.VertexAttributes;
-import com.badlogic.gdx.graphics.g3d.Material;
-import com.badlogic.gdx.graphics.g3d.Model;
-import com.badlogic.gdx.graphics.g3d.ModelBatch;
-import com.badlogic.gdx.graphics.g3d.ModelInstance;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogic.gdx.graphics.g3d.*;
 import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
+import com.badlogic.gdx.graphics.g3d.attributes.TextureAttribute;
+import com.badlogic.gdx.graphics.g3d.environment.DirectionalLight;
+import com.badlogic.gdx.graphics.g3d.utils.CameraInputController;
 import com.badlogic.gdx.graphics.g3d.utils.ModelBuilder;
 import com.badlogic.gdx.math.Vector3;
+import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.ScreenUtils;
 
 public class GameScreen extends ScreenAdapter {
     private PerspectiveCamera cam;
+    private CameraInputController camController;
     private Model cubeModel;
+    private Model groundModel;
     private ModelInstance cubeInstance;
+    private Array<ModelInstance> instances;
     private ModelBatch modelBatch;
+    private Environment environment;
+    private Texture textureGround;
 
     @Override
     public void show() {
@@ -32,6 +40,9 @@ public class GameScreen extends ScreenAdapter {
         cam.far = 300f;
         cam.update();
 
+        camController = new CameraInputController(cam);
+        Gdx.input.setInputProcessor(camController);
+
         modelBatch = new ModelBatch();
 
         ModelBuilder modelBuilder = new ModelBuilder();
@@ -42,17 +53,39 @@ public class GameScreen extends ScreenAdapter {
             VertexAttributes.Usage.Position | VertexAttributes.Usage.Normal);
 
         // create model instance
-        cubeInstance = new ModelInstance(cubeModel, 0, 0, 0);
+        cubeInstance = new ModelInstance(cubeModel, 0, 2.5f, 0);
+
+        textureGround = new Texture(Gdx.files.internal("textures/Stylized_Stone_Floor_005_basecolor.jpg"), true);
+        textureGround.setFilter(Texture.TextureFilter.MipMapLinearLinear, Texture.TextureFilter.Linear);
+        textureGround.setWrap(Texture.TextureWrap.Repeat, Texture.TextureWrap.Repeat);
+        TextureRegion textureRegion = new TextureRegion(textureGround);
+        int repeats = 10;
+        textureRegion.setRegion(0,0,textureGround.getWidth()*repeats, textureGround.getHeight()*repeats );
+
+        // create model
+        groundModel = modelBuilder.createBox(100f, 1f, 100f,
+            new Material(TextureAttribute.createDiffuse(textureRegion)),
+            VertexAttributes.Usage.Position | VertexAttributes.Usage.Normal | VertexAttributes.Usage.TextureCoordinates);
+
+        instances = new Array<>();
+        instances.add(new ModelInstance(groundModel, 0, -1, 0));	// 'table top' surface
+        instances.add(cubeInstance);
+
+        environment = new Environment();
+        environment.set(new ColorAttribute(ColorAttribute.AmbientLight, 0.2f, 0.2f, 0.2f, 1f));
+        environment.add(new DirectionalLight().setColor(0.5f, 0.5f, 0.5f, 1.0f).setDirection(-0.3f, -0.8f, -0.2f));
     }
 
     @Override
     public void render(float delta) {
+        camController.update();
+
         // Draw your screen here. "delta" is the time since last render in seconds.
         cubeInstance.transform.rotate(Vector3.Y, 45f * delta);
 
         ScreenUtils.clear(Color.TEAL, true);
         modelBatch.begin(cam);
-        modelBatch.render(cubeInstance);
+        modelBatch.render(instances, environment);
         modelBatch.end();
     }
 
@@ -72,6 +105,7 @@ public class GameScreen extends ScreenAdapter {
     public void dispose() {
         // Destroy screen's assets here.
         cubeModel.dispose();
+        groundModel.dispose();
         modelBatch.dispose();
     }
 }
