@@ -12,8 +12,6 @@ import com.badlogic.gdx.graphics.g3d.*;
 import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
 import com.badlogic.gdx.graphics.g3d.attributes.TextureAttribute;
 import com.badlogic.gdx.graphics.g3d.environment.DirectionalLight;
-import com.badlogic.gdx.graphics.g3d.utils.CameraInputController;
-import com.badlogic.gdx.graphics.g3d.utils.FirstPersonCameraController;
 import com.badlogic.gdx.graphics.g3d.utils.ModelBuilder;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Array;
@@ -21,7 +19,7 @@ import com.badlogic.gdx.utils.ScreenUtils;
 
 public class GameScreen extends ScreenAdapter {
     private PerspectiveCamera cam;
-    private FirstPersonCameraController camController;
+    private CamController camController;
     private Model cubeModel;
     private Model groundModel;
     private ModelInstance cubeInstance;
@@ -42,7 +40,7 @@ public class GameScreen extends ScreenAdapter {
         cam.far = 300f;
         cam.update();
 
-        camController = new FirstPersonCameraController(cam);
+        camController = new CamController(cam);
         Gdx.input.setInputProcessor(camController);
 
         modelBatch = new ModelBatch();
@@ -85,7 +83,7 @@ public class GameScreen extends ScreenAdapter {
     public void render(float delta) {
         if(Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE))
             Gdx.app.exit();
-        camController.update();
+        camController.update(delta);
 
         // Draw your screen here. "delta" is the time since last render in seconds.
         cubeInstance.transform.rotate(Vector3.Y, 45f * delta);
