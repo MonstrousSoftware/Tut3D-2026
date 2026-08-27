@@ -6,77 +6,26 @@ import com.badlogic.gdx.ScreenAdapter;
 import com.badlogic.gdx.graphics.*;
 import com.badlogic.gdx.graphics.g3d.*;
 import com.badlogic.gdx.utils.ScreenUtils;
-import net.mgsx.gltf.loaders.gltf.GLTFLoader;
-import net.mgsx.gltf.scene3d.attributes.PBRCubemapAttribute;
-import net.mgsx.gltf.scene3d.attributes.PBRTextureAttribute;
-import net.mgsx.gltf.scene3d.lights.DirectionalLightEx;
-import net.mgsx.gltf.scene3d.scene.Scene;
-import net.mgsx.gltf.scene3d.scene.SceneAsset;
-import net.mgsx.gltf.scene3d.scene.SceneManager;
-import net.mgsx.gltf.scene3d.scene.SceneSkybox;
-import net.mgsx.gltf.scene3d.utils.IBLBuilder;
 
 public class GameScreen extends ScreenAdapter {
-    private SceneManager sceneManager;
-    private SceneAsset sceneAsset;
-    private Cubemap diffuseCubemap;
-    private Cubemap environmentCubemap;
-    private Cubemap specularCubemap;
-    private Texture brdfLUT;
-    private SceneSkybox skybox;
-
-    private PerspectiveCamera cam;
+    private World world;
+    private GameView gameView;
+    private GridView gridView;
     private CamController camController;
 
     @Override
     public void show() {
-        // Prepare your screen here.
-        sceneManager = new SceneManager();
-        sceneAsset = new GLTFLoader().load(Gdx.files.internal("models/step3.gltf"));
-        Scene scene = new Scene(sceneAsset.scene);
-        sceneManager.addScene(scene);
+        world = new World("models/step4a.gltf");
+        Populator.populate(world);
+        gameView = new GameView(world);
+        gridView = new GridView();
 
-        // create camera
-        cam = new PerspectiveCamera(67, Gdx.graphics.getWidth(),  Gdx.graphics.getHeight());
-        cam.position.set(10f, Settings.eyeHeight, 5f);
-        cam.lookAt(0,Settings.eyeHeight,0);
-        cam.near = 0.1f;
-        cam.far = 300f;
-        cam.update();
-
-        camController = new CamController(cam);
+        camController = new CamController (gameView.getCamera());
         Gdx.input.setInputProcessor(camController);
 
-        sceneManager.setCamera(cam);
-
-        // setup light
-        DirectionalLightEx light = new DirectionalLightEx();
-        light.direction.set(1, -3, 1).nor();
-        light.color.set(Color.WHITE);
-        light.intensity = 3f;
-        sceneManager.environment.add(light);
-
-        // setup quick IBL (image based lighting)
-        IBLBuilder iblBuilder = IBLBuilder.createOutdoor(light);
-        environmentCubemap = iblBuilder.buildEnvMap(1024);
-        diffuseCubemap = iblBuilder.buildIrradianceMap(256);
-        specularCubemap = iblBuilder.buildRadianceMap(10);
-        iblBuilder.dispose();
-
-        // This texture is provided by the library, no need to have it in your assets.
-        brdfLUT = new Texture(Gdx.files.classpath("net/mgsx/gltf/shaders/brdfLUT.png"));
-
-        sceneManager.setAmbientLight(1f);
-        sceneManager.environment.set(new PBRTextureAttribute(PBRTextureAttribute.BRDFLUTTexture, brdfLUT));
-        sceneManager.environment.set(PBRCubemapAttribute.createSpecularEnv(specularCubemap));
-        sceneManager.environment.set(PBRCubemapAttribute.createDiffuseEnv(diffuseCubemap));
-
-        // setup skybox
-        skybox = new SceneSkybox(environmentCubemap);
-        sceneManager.setSkyBox(skybox);
-
+        // hide the mouse cursor and fix it to screen centre, so it doesn't go out the window canvas
         Gdx.input.setCursorCatched(true);
-        Gdx.input.setCursorPosition(Gdx.graphics.getWidth()/2, Gdx.graphics.getHeight()/2);
+        Gdx.input.setCursorPosition(Gdx.graphics.getWidth() / 2, Gdx.graphics.getHeight() / 2);
     }
 
     @Override
@@ -87,8 +36,9 @@ public class GameScreen extends ScreenAdapter {
 
         ScreenUtils.clear(Color.TEAL, true);
 
-        sceneManager.update(delta);
-        sceneManager.render();
+        world.update(delta);
+        gameView.render(delta);
+        gridView.render(gameView.getCamera());
     }
 
     @Override
@@ -97,18 +47,14 @@ public class GameScreen extends ScreenAdapter {
         // In that case, we don't resize anything, and wait for the window to be a normal size before updating.
         if(width <= 0 || height <= 0) return;
 
-        sceneManager.updateViewport(width, height);
+        gameView.resize(width, height);
     }
 
     @Override
     public void dispose() {
         // Destroy screen's assets here.
-        sceneManager.dispose();
-        sceneAsset.dispose();
-        environmentCubemap.dispose();
-        diffuseCubemap.dispose();
-        specularCubemap.dispose();
-        brdfLUT.dispose();
-        skybox.dispose();
+        gameView.dispose();
+        gridView.dispose();
+        world.dispose();
     }
 }
