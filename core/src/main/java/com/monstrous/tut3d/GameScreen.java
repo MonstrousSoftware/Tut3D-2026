@@ -4,13 +4,16 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.ScreenAdapter;
 import com.badlogic.gdx.graphics.*;
-import com.badlogic.gdx.graphics.g3d.*;
 import com.badlogic.gdx.utils.ScreenUtils;
+import com.monstrous.tut3d.views.GameView;
+import com.monstrous.tut3d.views.GridView;
+import com.monstrous.tut3d.views.PhysicsView;
 
 public class GameScreen extends ScreenAdapter {
     private World world;
     private GameView gameView;
     private GridView gridView;
+    private PhysicsView physicsView;
     private CamController camController;
 
     @Override
@@ -18,6 +21,7 @@ public class GameScreen extends ScreenAdapter {
         world = new World("models/step4a.gltf");
         Populator.populate(world);
         gameView = new GameView(world);
+        physicsView = new PhysicsView(world);
         gridView = new GridView();
 
         camController = new CamController (gameView.getCamera());
@@ -32,12 +36,13 @@ public class GameScreen extends ScreenAdapter {
     public void render(float delta) {
         if(Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE))
             Gdx.app.exit();
+        if(Gdx.input.isKeyJustPressed(Input.Keys.R))
+            Populator.populate(world);
         camController.update(delta);
-
-        ScreenUtils.clear(Color.TEAL, true);
 
         world.update(delta);
         gameView.render(delta);
+        physicsView.render(gameView.getCamera());
         gridView.render(gameView.getCamera());
     }
 
@@ -55,6 +60,7 @@ public class GameScreen extends ScreenAdapter {
         // Destroy screen's assets here.
         gameView.dispose();
         gridView.dispose();
+        physicsView.dispose();
         world.dispose();
     }
 }
