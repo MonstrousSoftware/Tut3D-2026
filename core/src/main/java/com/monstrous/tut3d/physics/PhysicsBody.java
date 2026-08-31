@@ -4,6 +4,7 @@ import com.badlogic.gdx.graphics.g3d.ModelBatch;
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import com.badlogic.gdx.math.Quaternion;
 import com.badlogic.gdx.math.Vector3;
+import com.monstrous.tut3d.Settings;
 import org.ode4j.math.DQuaternion;
 import org.ode4j.math.DQuaternionC;
 import org.ode4j.math.DVector3C;
@@ -75,5 +76,12 @@ public class PhysicsBody {
     public void applyForce( Vector3 force ){
         DBody rigidBody = geom.getBody();
         rigidBody.addForce(force.x, force.y, force.z);
+    }
+
+    public void setPlayerCharacteristics() {
+        DBody rigidBody = geom.getBody();
+        rigidBody.setDamping(Settings.playerLinearDamping, Settings.playerAngularDamping);
+        rigidBody.setAutoDisableFlag(false);       // never allow player to get disabled
+        rigidBody.setMaxAngularSpeed(0);        // keep capsule upright by not allowing rotations
     }
 }

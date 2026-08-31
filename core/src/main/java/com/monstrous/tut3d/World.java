@@ -6,6 +6,7 @@ import com.badlogic.gdx.graphics.g3d.model.Node;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Disposable;
+import com.monstrous.tut3d.inputs.PlayerController;
 import com.monstrous.tut3d.physics.CollisionShapeType;
 import com.monstrous.tut3d.physics.PhysicsBody;
 import com.monstrous.tut3d.physics.PhysicsBodyFactory;
@@ -22,6 +23,7 @@ public class World implements Disposable {
     private boolean isDirty;
     private final PhysicsWorld physicsWorld;
     private final PhysicsBodyFactory factory;
+    private final PlayerController playerController;
 
 
     public World(String modelFileName) {
@@ -34,6 +36,7 @@ public class World implements Disposable {
         isDirty = true;
         physicsWorld = new PhysicsWorld();
         factory = new PhysicsBodyFactory(physicsWorld);
+        playerController = new PlayerController();
     }
 
     public boolean isDirty(){
@@ -46,6 +49,16 @@ public class World implements Disposable {
         player = null;
         isDirty = true;
     }
+
+    public void setPlayer(GameObject go){
+        player = go;
+        player.body.setPlayerCharacteristics();
+    }
+
+    public PlayerController getPlayerController(){
+        return playerController;
+    }
+
     public int getNumGameObjects() {
         return gameObjects.size;
     }
@@ -88,7 +101,7 @@ public class World implements Disposable {
     private final Vector3 shootDirection = new Vector3();
 
     public void shoot() {
-        dir.set( player.getDirection() );
+        dir.set( playerController.getViewingDirection() );
         spawnPos.set(dir);
         spawnPos.add(player.getPosition()); // spawn from 1 unit in front of the player
         GameObject ball = spawnObject(false, "ball",  CollisionShapeType.SPHERE, true, spawnPos, Settings.ballMass );
@@ -99,12 +112,16 @@ public class World implements Disposable {
     }
 
     public void update( float deltaTime ) {
+        playerController.update(player, deltaTime);
         physicsWorld.update(deltaTime);
         for(GameObject go : gameObjects){
             if( go.body.geom.getBody() != null) {
                 go.scene.modelInstance.transform.set(go.body.getPosition(), go.body.getBodyOrientation());
             }
         }
+        // the player model is an exception, use information from the player controller, since the rigid body is not rotated.
+        player.scene.modelInstance.transform.setToRotation(Vector3.Z, playerController.getForwardDirection());
+        player.scene.modelInstance.transform.setTranslation(player.body.getPosition());
     }
 
     @Override

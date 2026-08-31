@@ -5,6 +5,7 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g3d.ModelBatch;
 import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
 import com.badlogic.gdx.utils.Disposable;
+import com.monstrous.tut3d.GameObject;
 import com.monstrous.tut3d.World;
 import com.monstrous.tut3d.physics.PhysicsBody;
 import org.ode4j.ode.DGeom;
@@ -26,8 +27,11 @@ public class PhysicsView implements Disposable {
     public void render( Camera cam ) {
         modelBatch.begin(cam);
         int num = world.getNumGameObjects();
-        for(int i = 0; i < num; i++)
-            renderCollisionShape(world.getGameObject(i).body);
+        for(int i = 0; i < num; i++) {
+            GameObject go = world.getGameObject(i);
+            if (go.visible)
+                renderCollisionShape(go.body);
+        }
         modelBatch.end();
     }
 

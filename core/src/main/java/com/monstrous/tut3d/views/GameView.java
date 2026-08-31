@@ -1,12 +1,14 @@
 package com.monstrous.tut3d.views;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Cubemap;
 import com.badlogic.gdx.graphics.PerspectiveCamera;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.utils.Disposable;
 import com.badlogic.gdx.utils.ScreenUtils;
+import com.monstrous.tut3d.inputs.CamController;
 import com.monstrous.tut3d.Settings;
 import com.monstrous.tut3d.World;
 import net.mgsx.gltf.scene3d.attributes.PBRCubemapAttribute;
@@ -28,6 +30,7 @@ public class GameView implements Disposable {
     private final Cubemap specularCubemap;
     private final Texture brdfLUT;
     private final SceneSkybox skybox;
+    public CamController camController;
 
     public GameView(World world) {
         this.world = world;
@@ -39,6 +42,8 @@ public class GameView implements Disposable {
         cam.near = 0.1f;
         cam.far = 300f;
         cam.update();
+
+        camController = new CamController (cam);
 
         sceneManager.setCamera(cam);
 
@@ -83,11 +88,19 @@ public class GameView implements Disposable {
         int num = world.getNumGameObjects();
         for(int i = 0; i < num; i++){
             Scene scene = world.getGameObject(i).scene;
-            sceneManager.addScene(scene);
+            if(world.getGameObject(i).visible)
+                sceneManager.addScene(scene, false);
         }
     }
 
     public void render(float delta ) {
+        if (Gdx.input.isKeyJustPressed(Input.Keys.F2)) {
+            boolean thirdPersonView = !camController.getThirdPersonMode();
+            camController.setThirdPersonMode(thirdPersonView);
+            world.player.visible = thirdPersonView;            // hide player mesh in first person
+            refresh();
+        }
+
         cam.update();
         if(world.isDirty())
             refresh();

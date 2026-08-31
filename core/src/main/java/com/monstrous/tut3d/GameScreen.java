@@ -4,7 +4,6 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.ScreenAdapter;
 import com.badlogic.gdx.graphics.*;
-import com.badlogic.gdx.utils.ScreenUtils;
 import com.monstrous.tut3d.views.GameView;
 import com.monstrous.tut3d.views.GridView;
 import com.monstrous.tut3d.views.PhysicsView;
@@ -14,7 +13,7 @@ public class GameScreen extends ScreenAdapter {
     private GameView gameView;
     private GridView gridView;
     private PhysicsView physicsView;
-    private CamController camController;
+
     private boolean debugRender = false;
 
     @Override
@@ -25,8 +24,9 @@ public class GameScreen extends ScreenAdapter {
         physicsView = new PhysicsView(world);
         gridView = new GridView();
 
-        camController = new CamController (gameView.getCamera());
-        Gdx.input.setInputProcessor(camController);
+
+        Gdx.input.setInputProcessor(gameView.camController);
+        Gdx.input.setInputProcessor(world.getPlayerController());
 
         // hide the mouse cursor and fix it to screen centre, so it doesn't go out the window canvas
         Gdx.input.setCursorCatched(true);
@@ -43,7 +43,8 @@ public class GameScreen extends ScreenAdapter {
             world.shoot();
         if (Gdx.input.isKeyJustPressed(Input.Keys.F1))
             debugRender = !debugRender;
-        camController.update(delta);
+
+        gameView.camController.update(world.player.getPosition(), world.getPlayerController().getViewingDirection());
 
         world.update(delta);
         gameView.render(delta);
