@@ -71,4 +71,9 @@ public class PhysicsBody {
         if(rigidBody != null)
             rigidBody.setQuaternion(odeQ);
     }
+
+    public void applyForce( Vector3 force ){
+        DBody rigidBody = geom.getBody();
+        rigidBody.addForce(force.x, force.y, force.z);
+    }
 }

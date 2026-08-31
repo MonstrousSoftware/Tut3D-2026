@@ -15,6 +15,7 @@ public class GameScreen extends ScreenAdapter {
     private GridView gridView;
     private PhysicsView physicsView;
     private CamController camController;
+    private boolean debugRender = false;
 
     @Override
     public void show() {
@@ -38,12 +39,18 @@ public class GameScreen extends ScreenAdapter {
             Gdx.app.exit();
         if(Gdx.input.isKeyJustPressed(Input.Keys.R))
             Populator.populate(world);
+        if(Gdx.input.isKeyJustPressed(Input.Keys.F))
+            world.shoot();
+        if (Gdx.input.isKeyJustPressed(Input.Keys.F1))
+            debugRender = !debugRender;
         camController.update(delta);
 
         world.update(delta);
         gameView.render(delta);
-        physicsView.render(gameView.getCamera());
-        gridView.render(gameView.getCamera());
+        if(debugRender) {
+            physicsView.render(gameView.getCamera());
+            gridView.render(gameView.getCamera());
+        }
     }
 
     @Override

@@ -29,7 +29,7 @@ public class TeaVMBuilder {
                 .setJettyPort(8080)
         )
             .addAssets(new AssetFileHandle("../assets"))
-            
+
             .setOptimizationLevel(debug ? TeaVMOptimizationLevel.SIMPLE : TeaVMOptimizationLevel.ADVANCED)
             .setMainClass(TeaVMLauncher.class.getName())
             .setObfuscated(!debug)

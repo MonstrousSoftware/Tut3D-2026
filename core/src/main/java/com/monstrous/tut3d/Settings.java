@@ -15,5 +15,9 @@ public class Settings {
 
     static public float gravity = -9.8f; // meters / s^2
 
+    static public float ballMass = 0.2f;
+    static public float ballForce = 100f;
+
     static public final int shadowMapSize = 4096;
+
 }

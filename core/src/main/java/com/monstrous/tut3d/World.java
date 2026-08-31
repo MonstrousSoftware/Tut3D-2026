@@ -54,12 +54,12 @@ public class World implements Disposable {
         return gameObjects.get(index);
     }
 
-    public GameObject spawnObject(boolean isStatic, String name, CollisionShapeType shape, Vector3 position, float mass){
+    public GameObject spawnObject(boolean isStatic, String name, CollisionShapeType shape, boolean resetPosition, Vector3 position, float mass){
         Scene scene = new Scene(sceneAsset.scene, name);
         if(scene.modelInstance.nodes.size == 0)
             throw new RuntimeException("Cannot find node in GLTF file: " + name);
 
-        applyNodeTransform(scene.modelInstance, scene.modelInstance.nodes.first());         // incorporate nodes' transform into model instance transform
+        applyNodeTransform(resetPosition, scene.modelInstance, scene.modelInstance.nodes.first());         // incorporate nodes' transform into model instance transform
         scene.modelInstance.transform.translate(position);
 
         PhysicsBody body = factory.createBody(scene.modelInstance, shape, mass, isStatic);
@@ -69,8 +69,9 @@ public class World implements Disposable {
         return go;
     }
 
-    private void applyNodeTransform(ModelInstance modelInstance, Node node ){
-        modelInstance.transform.mul(node.globalTransform);
+    private void applyNodeTransform(boolean resetPosition, ModelInstance modelInstance, Node node ){
+        if(!resetPosition)
+            modelInstance.transform.mul(node.globalTransform);
         node.translation.set(0,0,0);
         node.scale.set(1,1,1);
         node.rotation.idt();
@@ -82,6 +83,20 @@ public class World implements Disposable {
         isDirty = true;
     }
 
+    private final Vector3 dir = new Vector3();
+    private final Vector3 spawnPos = new Vector3();
+    private final Vector3 shootDirection = new Vector3();
+
+    public void shoot() {
+        dir.set( player.getDirection() );
+        spawnPos.set(dir);
+        spawnPos.add(player.getPosition()); // spawn from 1 unit in front of the player
+        GameObject ball = spawnObject(false, "ball",  CollisionShapeType.SPHERE, true, spawnPos, Settings.ballMass );
+        shootDirection.set(dir);        // shoot forward
+        shootDirection.y += 0.5f;       // and slightly up
+        shootDirection.scl(Settings.ballForce);   // scale for speed
+        ball.body.applyForce(shootDirection);
+    }
 
     public void update( float deltaTime ) {
         physicsWorld.update(deltaTime);
