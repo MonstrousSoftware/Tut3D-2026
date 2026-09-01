@@ -136,7 +136,7 @@ public class PlayerController extends InputAdapter {
         if (keys.containsKey(jumpKey) )
             linearForce.y =  deltaTime *Settings.jumpForce;
 
-        linearForce.scl(2500);
+        linearForce.scl(500);
         player.body.applyForce(linearForce);
         // note: as the player body is a capsule it is not necessary to rotate it
         // (and in fact it causes problems due to errors building up)

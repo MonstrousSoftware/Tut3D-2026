@@ -18,7 +18,7 @@ public class Settings {
     static public float gravity = -30f;
 
     static public float ballMass = 0.2f;
-    static public float ballForce = 1500f;
+    static public float ballForce = 300f;
 
     static public float playerMass = 1f;
     static public float playerLinearDamping = 0.05f;

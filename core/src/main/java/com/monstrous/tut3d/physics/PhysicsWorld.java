@@ -12,7 +12,7 @@ import static org.ode4j.ode.OdeConstants.*;
 // World of rigid body dynamics and collisions
 //
 public class PhysicsWorld implements Disposable {
-    static final float TIME_STEP = 1f/200f;  // fixed physics time step
+    static final float TIME_STEP = 1f/60f;  // fixed physics time step
 
     DWorld world;
     public DSpace space;
