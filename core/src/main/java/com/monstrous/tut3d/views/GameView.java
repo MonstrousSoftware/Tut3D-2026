@@ -82,6 +82,7 @@ public class GameView implements Disposable {
     }
 
     public void refresh() {
+        world.player.visible = camController.getThirdPersonMode();
         sceneManager.getRenderableProviders().clear();        // remove all scenes
 
         // add scene for each game object
@@ -95,9 +96,7 @@ public class GameView implements Disposable {
 
     public void render(float delta ) {
         if (Gdx.input.isKeyJustPressed(Input.Keys.F2)) {
-            boolean thirdPersonView = !camController.getThirdPersonMode();
-            camController.setThirdPersonMode(thirdPersonView);
-            world.player.visible = thirdPersonView;            // hide player mesh in first person
+            camController.setThirdPersonMode(!camController.getThirdPersonMode());
             refresh();
         }
 

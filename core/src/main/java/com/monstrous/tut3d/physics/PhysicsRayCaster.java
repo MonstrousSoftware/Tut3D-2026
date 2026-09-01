@@ -50,7 +50,6 @@ public class PhysicsRayCaster implements Disposable {
                 }
                 else
                     go = (GameObject) o2.getData();
-                Gdx.app.log("ray cast", go.scene.modelInstance.nodes.first().id);
                 if(go == player)      // ignore collision with player itself
                     return;
 
