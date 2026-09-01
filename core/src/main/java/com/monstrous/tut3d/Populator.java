@@ -13,9 +13,9 @@ public class Populator {
         world.spawnObject(true, "brickcube.002", CollisionShapeType.BOX,false,Vector3.Zero, 1f);
         world.spawnObject(true, "brickcube.003", CollisionShapeType.BOX,false,Vector3.Zero, 1f);
         world.spawnObject(true, "wall", CollisionShapeType.BOX,false,Vector3.Zero, 1f);
-        world.spawnObject(false, "ball", CollisionShapeType.SPHERE, true, new Vector3(0,4,-2), 1f);
-        world.spawnObject(false, "ball", CollisionShapeType.SPHERE,true, new Vector3(-1,5,-2), 1f);
-        world.spawnObject(false, "ball", CollisionShapeType.SPHERE, true, new Vector3(-2,6,-2), 1f);
+        world.spawnObject(false, "ball", CollisionShapeType.SPHERE, true, new Vector3(0,4,-2), Settings.ballMass);
+        world.spawnObject(false, "ball", CollisionShapeType.SPHERE,true, new Vector3(-1,5,-2), Settings.ballMass);
+        world.spawnObject(false, "ball", CollisionShapeType.SPHERE, true, new Vector3(-2,6,-2), Settings.ballMass);
 
         GameObject player = world.spawnObject(false, "ducky",CollisionShapeType.CAPSULE, true, new Vector3(0,1,0), Settings.playerMass);
         world.setPlayer(player);
