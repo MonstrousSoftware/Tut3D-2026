@@ -17,6 +17,8 @@ public class Settings {
     static public float headBobHeight = 0.04f;  // m
     static public float degreesPerPixel = 0.1f; // mouse sensitivity
 
+    static public float groundRayLength = 1.2f;
+
     static public float gravity = -30f;
 
     static public float ballMass = 0.2f;

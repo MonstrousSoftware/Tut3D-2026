@@ -7,6 +7,7 @@ import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.IntIntMap;
 import com.monstrous.tut3d.GameObject;
 import com.monstrous.tut3d.Settings;
+import com.monstrous.tut3d.physics.PhysicsRayCaster;
 
 public class PlayerController extends InputAdapter {
     public int forwardKey = Input.Keys.W;
@@ -24,14 +25,18 @@ public class PlayerController extends InputAdapter {
     private final Vector3 viewingDirection;   // look direction, is forwardDirection plus Y component
     private float mouseDeltaX;
     private float mouseDeltaY;
+    private final PhysicsRayCaster rayCaster;
     private final Vector3 tmp = new Vector3();
     private final Vector3 tmp2 = new Vector3();
     private final Vector3 tmp3 = new Vector3();
+    private final Vector3 groundNormal;
 
-    public PlayerController()  {
+    public PlayerController(PhysicsRayCaster rayCaster)  {
+        this.rayCaster = rayCaster;
         linearForce = new Vector3();
         forwardDirection = new Vector3();
         viewingDirection = new Vector3();
+        groundNormal = new Vector3();
         reset();
     }
 
@@ -102,6 +107,15 @@ public class PlayerController extends InputAdapter {
     }
 
     public void update (GameObject player, float deltaTime ) {
+        boolean isOnGround = rayCaster.isGrounded(player, player.getPosition(), Settings.groundRayLength, groundNormal);
+        // disable gravity if player is on a slope
+        if(isOnGround) {
+            float dot = groundNormal.dot(Vector3.Y);
+            player.body.geom.getBody().setGravityMode(dot >= 0.99f);
+        } else
+            player.body.geom.getBody().setGravityMode(true);
+
+
         // derive forward direction vector from viewing direction
         forwardDirection.set(viewingDirection);
         forwardDirection.y = 0;
@@ -133,7 +147,7 @@ public class PlayerController extends InputAdapter {
         if (keys.containsKey(turnRightKey))
             rotateView(-deltaTime * Settings.turnSpeed, 0);
 
-        if (keys.containsKey(jumpKey) )
+        if (isOnGround && keys.containsKey(jumpKey) )
             linearForce.y =  deltaTime *Settings.jumpForce;
 
         linearForce.scl(500);
