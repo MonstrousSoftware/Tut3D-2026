@@ -25,13 +25,10 @@ public class World implements Disposable {
     private final PhysicsRayCaster rayCaster;
     public final GameStats stats;
 
-    public World(String modelFileName) {
+    public World() {
 
         gameObjects = new Array<>();
-        sceneAsset = new GLTFLoader().load(Gdx.files.internal(modelFileName));
-        for(Node node : sceneAsset.scene.model.nodes){  // print some debug info
-            Gdx.app.log("Node ", node.id);
-        }
+        sceneAsset = Main.assets.sceneAsset;
         isDirty = true;
         physicsWorld = new PhysicsWorld(this);
         rayCaster = new PhysicsRayCaster(physicsWorld);
@@ -49,6 +46,7 @@ public class World implements Disposable {
         gameObjects.clear();
         player = null;
         isDirty = true;
+        stats.reset();
     }
 
     public void setPlayer(GameObject go){
@@ -79,6 +77,10 @@ public class World implements Disposable {
         PhysicsBody body = factory.createBody(collisionInstance, shapeType, mass, type.isStatic);
         GameObject go = new GameObject(type, scene, body);
         gameObjects.add(go);
+        if(go.type == GameObjectType.TYPE_ENEMY)
+            stats.numEnemies++;
+        if(go.type == GameObjectType.TYPE_PICKUP_COIN)
+            stats.numCoins++;
         isDirty = true;         // list of game objects has changed
         return go;
     }
@@ -105,6 +107,7 @@ public class World implements Disposable {
         gameObject.health = 0;
         if(gameObject.type == GameObjectType.TYPE_ENEMY)
             stats.numEnemies--;
+        System.out.println("Enemies: "+stats.numEnemies);
         isDirty = true;
     }
 
@@ -126,6 +129,13 @@ public class World implements Disposable {
     }
 
     public void update( float deltaTime ) {
+        if(stats.numEnemies > 0 || stats.coinsCollected < stats.numCoins)
+            stats.gameTime += deltaTime;
+        else {
+            if(!stats.levelComplete)
+                Main.assets.sounds.GAME_COMPLETED.play();
+            stats.levelComplete = true;
+        }
         if(player.isDead())
             return;
         playerController.update(player, deltaTime);
@@ -182,21 +192,31 @@ public class World implements Disposable {
     private void bulletHit(GameObject character, GameObject bullet) {
         removeObject(bullet);
         character.health -= 0.25f;      // - 25% health
-        if(character.isDead())
+        Main.assets.sounds.HIT.play();
+        if(character.isDead()) {
             removeObject(character);
+            if (character.type.isPlayer)
+                Main.assets.sounds.GAME_OVER.play();
+        }
+        System.out.println("Player health: "+100f*player.health+" %");
     }
 
     private void pickup(GameObject character, GameObject pickup){
-        removeObject(pickup);
-        if(pickup.type == GameObjectType.TYPE_PICKUP_COIN)
+        if(pickup.type == GameObjectType.TYPE_PICKUP_COIN) {
             stats.coinsCollected++;
-        if(pickup.type == GameObjectType.TYPE_PICKUP_HEALTH)
-            character.health = Math.min(character.health + 0.5f, 1f);   // +50% health
+            System.out.println("Coins: "+stats.coinsCollected+"/"+stats.numCoins);
+            Main.assets.sounds.COIN.play();
+        }
+        else if(pickup.type == GameObjectType.TYPE_PICKUP_HEALTH) {
+            character.health = Math.min(character.health + 0.5f, 1f);
+            System.out.println("Player health: "+100f*player.health+" %");
+            Main.assets.sounds.UPGRADE.play();
+        }
+        removeObject(pickup);
     }
 
     @Override
     public void dispose() {
-        sceneAsset.dispose();
         physicsWorld.dispose();
         rayCaster.dispose();
     }
