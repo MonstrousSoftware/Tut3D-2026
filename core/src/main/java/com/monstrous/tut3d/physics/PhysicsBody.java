@@ -78,7 +78,12 @@ public class PhysicsBody {
         rigidBody.addForce(force.x, force.y, force.z);
     }
 
-    public void setPlayerCharacteristics() {
+    public void applyTorque( Vector3 torque ){
+        DBody rigidBody = geom.getBody();
+        rigidBody.addTorque(torque.x, torque.y, torque.z);
+    }
+
+    public void setCapsuleCharacteristics() {
         DBody rigidBody = geom.getBody();
         rigidBody.setDamping(Settings.playerLinearDamping, Settings.playerAngularDamping);
         rigidBody.setAutoDisableFlag(false);       // never allow player to get disabled

@@ -6,6 +6,7 @@ import com.badlogic.gdx.graphics.g3d.model.Node;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Disposable;
+import com.monstrous.tut3d.behaviours.CookBehaviour;
 import com.monstrous.tut3d.inputs.PlayerController;
 import com.monstrous.tut3d.physics.*;
 import net.mgsx.gltf.loaders.gltf.GLTFLoader;
@@ -50,7 +51,7 @@ public class World implements Disposable {
 
     public void setPlayer(GameObject go){
         player = go;
-        player.body.setPlayerCharacteristics();
+        player.body.setCapsuleCharacteristics();
     }
 
     public PlayerController getPlayerController(){
@@ -120,15 +121,25 @@ public class World implements Disposable {
 
     public void update( float deltaTime ) {
         playerController.update(player, deltaTime);
+        for(GameObject go : gameObjects)
+            go.update(this, deltaTime);
         physicsWorld.update(deltaTime);
         for(GameObject go : gameObjects){
             if( go.body.geom.getBody() != null) {
-                go.scene.modelInstance.transform.set(go.body.getPosition(), go.body.getBodyOrientation());
+                if(go.type == GameObjectType.TYPE_PLAYER){
+                    // use information from the player controller, since the rigid body is not rotated.
+                    player.scene.modelInstance.transform.setToRotation(Vector3.Z, playerController.getForwardDirection());
+                    player.scene.modelInstance.transform.setTranslation(go.body.getPosition());
+                }
+                else if(go.type == GameObjectType.TYPE_ENEMY){
+                    CookBehaviour cb = (CookBehaviour) go.behaviour;
+                    go.scene.modelInstance.transform.setToRotation(Vector3.Z, cb.getDirection());
+                    go.scene.modelInstance.transform.setTranslation(go.body.getPosition());
+                }
+                else
+                    go.scene.modelInstance.transform.set(go.body.getPosition(), go.body.getOrientation());
             }
         }
-        // the player model is an exception, use information from the player controller, since the rigid body is not rotated.
-        player.scene.modelInstance.transform.setToRotation(Vector3.Z, playerController.getForwardDirection());
-        player.scene.modelInstance.transform.setTranslation(player.body.getPosition());
     }
 
     public void onCollision(GameObject go1, GameObject go2){             // called on collision
