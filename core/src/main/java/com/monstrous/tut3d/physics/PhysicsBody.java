@@ -25,6 +25,13 @@ public class PhysicsBody {
         quaternion = new Quaternion();
     }
 
+    public void destroy() {
+        if(geom.getBody() != null) {
+            geom.getBody().destroy();
+        }
+        geom.destroy();
+    }
+
     public Vector3 getPosition() {
         DVector3C pos = geom.getPosition();
         position.x = (float) pos.get0();

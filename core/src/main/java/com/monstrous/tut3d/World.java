@@ -23,6 +23,7 @@ public class World implements Disposable {
     private final PhysicsBodyFactory factory;
     private final PlayerController playerController;
     private final PhysicsRayCaster rayCaster;
+    public final GameStats stats;
 
     public World(String modelFileName) {
 
@@ -36,6 +37,7 @@ public class World implements Disposable {
         rayCaster = new PhysicsRayCaster(physicsWorld);
         factory = new PhysicsBodyFactory(physicsWorld);
         playerController = new PlayerController(rayCaster);
+        stats = new GameStats();
     }
 
     public boolean isDirty(){
@@ -100,7 +102,9 @@ public class World implements Disposable {
     }
 
     public void removeObject(GameObject gameObject){
-        gameObjects.removeValue(gameObject, true);
+        gameObject.health = 0;
+        if(gameObject.type == GameObjectType.TYPE_ENEMY)
+            stats.numEnemies--;
         isDirty = true;
     }
 
@@ -109,10 +113,12 @@ public class World implements Disposable {
     private final Vector3 shootDirection = new Vector3();
 
     public void shoot() {
+        if(player.isDead())
+            return;
         dir.set( playerController.getViewingDirection() );
         spawnPos.set(dir);
         spawnPos.add(player.getPosition()); // spawn from 1 unit in front of the player
-        GameObject ball = spawnObject(GameObjectType.TYPE_DYNAMIC, "ball", null, CollisionShapeType.SPHERE, true, spawnPos, Settings.ballMass );
+        GameObject ball = spawnObject(GameObjectType.TYPE_FRIENDLY_BULLET, "ball", null, CollisionShapeType.SPHERE, true, spawnPos, Settings.ballMass );
         shootDirection.set(dir);        // shoot forward
         shootDirection.y += 0.5f;       // and slightly up
         shootDirection.scl(Settings.ballForce);   // scale for speed
@@ -120,6 +126,8 @@ public class World implements Disposable {
     }
 
     public void update( float deltaTime ) {
+        if(player.isDead())
+            return;
         playerController.update(player, deltaTime);
         for(GameObject go : gameObjects)
             go.update(this, deltaTime);
@@ -140,6 +148,14 @@ public class World implements Disposable {
                     go.scene.modelInstance.transform.set(go.body.getPosition(), go.body.getOrientation());
             }
         }
+        // remove dead objects
+        for(int i = 0; i < gameObjects.size; i++){
+            GameObject go = gameObjects.get(i);
+            if(go.isDead()){
+                gameObjects.removeValue(go, true);
+                go.dispose();
+            }
+        }
     }
 
     public void onCollision(GameObject go1, GameObject go2){             // called on collision
@@ -149,15 +165,34 @@ public class World implements Disposable {
     }
 
     private void handleCollision(GameObject go1, GameObject go2){
+        if(go1.type.isStatic || go2.type.isStatic)
+            return;
+
         if(go1.type.isPlayer && go2.type.canPickup){
             pickup(go1, go2);
         }
+
+        if(go1.type.isPlayer && go2.type.isEnemyBullet)
+            bulletHit(go1, go2);
+
+        if(go1.type.isEnemy && go2.type.isFriendlyBullet)
+            bulletHit(go1, go2);
+    }
+
+    private void bulletHit(GameObject character, GameObject bullet) {
+        removeObject(bullet);
+        character.health -= 0.25f;      // - 25% health
+        if(character.isDead())
+            removeObject(character);
     }
 
     private void pickup(GameObject character, GameObject pickup){
         removeObject(pickup);
+        if(pickup.type == GameObjectType.TYPE_PICKUP_COIN)
+            stats.coinsCollected++;
+        if(pickup.type == GameObjectType.TYPE_PICKUP_HEALTH)
+            character.health = Math.min(character.health + 0.5f, 1f);   // +50% health
     }
-
 
     @Override
     public void dispose() {

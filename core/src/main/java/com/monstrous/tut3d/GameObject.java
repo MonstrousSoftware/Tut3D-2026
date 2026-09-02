@@ -1,11 +1,12 @@
 package com.monstrous.tut3d;
 
 import com.badlogic.gdx.math.Vector3;
+import com.badlogic.gdx.utils.Disposable;
 import com.monstrous.tut3d.behaviours.Behaviour;
 import com.monstrous.tut3d.physics.PhysicsBody;
 import net.mgsx.gltf.scene3d.scene.Scene;
 
-public class GameObject {
+public class GameObject implements Disposable {
     public final GameObjectType type;
     public final Scene scene;
     public final PhysicsBody body;
@@ -42,5 +43,10 @@ public class GameObject {
         direction.set(Vector3.Z);
         direction.mul(body.getBodyOrientation());
         return direction;
+    }
+
+    @Override
+    public void dispose() {
+        body.destroy();
     }
 }
