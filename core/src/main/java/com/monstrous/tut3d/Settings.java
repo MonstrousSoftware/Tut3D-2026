@@ -24,8 +24,8 @@ public class Settings {
     static public float ballMass = 0.2f;
     static public float ballForce = 300f;
 
-    static public float panMass = 0.2f;
-    static public float panForce = 100f;
+    static public float panMass = 0.05f;
+    static public float panForce = 40f;
 
     static public float playerMass = 1f;
     static public float playerLinearDamping = 0.05f;
