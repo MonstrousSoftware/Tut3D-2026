@@ -22,7 +22,7 @@ public class World implements Disposable {
     private final PhysicsWorld physicsWorld;
     private final PhysicsBodyFactory factory;
     private final PlayerController playerController;
-    private final PhysicsRayCaster rayCaster;
+    public final PhysicsRayCaster rayCaster;
     public final GameStats stats;
     public final WeaponState weaponState = new WeaponState();
 
@@ -116,8 +116,9 @@ public class World implements Disposable {
     private final Vector3 dir = new Vector3();
     private final Vector3 spawnPos = new Vector3();
     private final Vector3 shootDirection = new Vector3();
+    private final Vector3 impulse = new Vector3();
 
-    public void shoot() {
+    public void shoot(Vector3 viewingDirection , PhysicsRayCaster.HitPoint hitPoint) {
         if(player.isDead())
             return;
         if(!weaponState.isWeaponReady())  // to give delay between shots
@@ -126,7 +127,7 @@ public class World implements Disposable {
 
         switch(weaponState.currentWeaponType) {
             case BALL:
-                dir.set(playerController.getViewingDirection());
+                dir.set(viewingDirection);
                 spawnPos.set(dir);
                 spawnPos.add(player.getPosition()); // spawn from 1 unit in front of the player
                 GameObject ball = spawnObject(GameObjectType.TYPE_FRIENDLY_BULLET, "ball", null, CollisionShapeType.SPHERE, true, spawnPos, Settings.ballMass);
@@ -137,6 +138,18 @@ public class World implements Disposable {
                 break;
             case GUN:
                 Main.assets.sounds.GUN_SHOT.play();
+                if(hitPoint.hit) {
+                    GameObject victim = hitPoint.refObject;
+                    Gdx.app.log("gunshot hit", victim.scene.modelInstance.nodes.first().id);
+                    if(victim.type.isEnemy)
+                        bulletHit(victim);
+
+                    impulse.set(victim.getPosition()).sub(player.getPosition()).nor().scl(Settings.gunForce);
+                    if(victim.body.geom.getBody() != null ) {
+                        victim.body.geom.getBody().enable();
+                        victim.body.applyForceAtPos(impulse, hitPoint.worldContactPoint);
+                    }
+                }
                 break;
         }
     }
@@ -191,20 +204,20 @@ public class World implements Disposable {
     private void handleCollision(GameObject go1, GameObject go2){
         if(go1.type.isStatic || go2.type.isStatic)
             return;
-
         if(go1.type.isPlayer && go2.type.canPickup){
             pickup(go1, go2);
         }
-
-        if(go1.type.isPlayer && go2.type.isEnemyBullet)
-            bulletHit(go1, go2);
-
-        if(go1.type.isEnemy && go2.type.isFriendlyBullet)
-            bulletHit(go1, go2);
+        if(go1.type.isPlayer && go2.type.isEnemyBullet) {
+            removeObject(go2);  // destroy bullet
+            bulletHit(go1);
+        }
+        if(go1.type.isEnemy && go2.type.isFriendlyBullet) {
+            removeObject(go2);  // destroy bullet
+            bulletHit(go1);
+        }
     }
 
-    private void bulletHit(GameObject character, GameObject bullet) {
-        removeObject(bullet);
+    private void bulletHit(GameObject character) {
         character.health -= 0.25f;      // - 25% health
         Main.assets.sounds.HIT.play();
         if(character.isDead()) {

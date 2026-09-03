@@ -63,9 +63,7 @@ public class GameScreen extends ScreenAdapter {
         if(Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE))
             Gdx.app.exit();
         if(Gdx.input.isKeyJustPressed(Input.Keys.R))
-            Populator.populate(world);
-        if(Gdx.input.isKeyJustPressed(Input.Keys.F))
-            world.shoot();
+            restart();
         if (Gdx.input.isKeyJustPressed(Input.Keys.F1))
             debugRender = !debugRender;
         if (Gdx.input.isKeyJustPressed(Input.Keys.F2) ) {
@@ -97,6 +95,7 @@ public class GameScreen extends ScreenAdapter {
 
     public void restart() {
         Populator.populate(world);
+        Gdx.input.setCursorCatched(true);
     }
 
     @Override

@@ -29,6 +29,8 @@ public class Settings {
     static public float panMass = 0.05f;
     static public float panForce = 40f;
 
+    static public float gunForce = 200f;
+
     static public float playerMass = 1f;
     static public float playerLinearDamping = 0.05f;
     static public float playerAngularDamping = 0.5f;

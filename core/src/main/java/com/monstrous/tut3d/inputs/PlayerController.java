@@ -34,6 +34,7 @@ public class PlayerController extends InputAdapter {
     private final Vector3 tmp3 = new Vector3();
     private final Vector3 groundNormal;
     private final World world;
+    private final PhysicsRayCaster.HitPoint hitPoint = new PhysicsRayCaster.HitPoint();
 
     public PlayerController(World world, PhysicsRayCaster rayCaster)  {
         this.world = world;
@@ -116,7 +117,8 @@ public class PlayerController extends InputAdapter {
     @Override
     public boolean touchDown(int screenX, int screenY, int pointer, int button) {
         if(button == Input.Buttons.LEFT) {
-            world.shoot();
+            world.rayCaster.findTarget(world.player.getPosition(), viewingDirection, hitPoint);
+            world.shoot(  viewingDirection, hitPoint  );
         }
         return false;
     }
