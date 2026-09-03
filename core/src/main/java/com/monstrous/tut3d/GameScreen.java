@@ -58,6 +58,7 @@ public class GameScreen extends ScreenAdapter {
             physicsView.render(gameView.getCamera());
             gridView.render(gameView.getCamera());
         }
+        gui.showCrossHair( !gameView.inThirdPersonMode() );
         gui.render(delta);
     }
 

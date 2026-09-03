@@ -115,6 +115,11 @@ public class GameView implements Disposable {
         sceneManager.updateViewport(width, height);
     }
 
+
+    public boolean inThirdPersonMode() {
+        return camController.getThirdPersonMode();
+    }
+
     @Override
     public void dispose() {
         sceneManager.dispose();
