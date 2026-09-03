@@ -9,6 +9,7 @@ public class GameObjectType {
     public final static GameObjectType TYPE_ENEMY = new GameObjectType("enemy", false, false, false, true, false, false);
     public final static GameObjectType TYPE_FRIENDLY_BULLET = new GameObjectType("bullet", false, false, false, false, true,false);
     public final static GameObjectType TYPE_ENEMY_BULLET = new GameObjectType("bullet", false, false, false, false,false, true);
+    public final static GameObjectType TYPE_PICKUP_GUN = new GameObjectType("gun", false, false, true, false , false, false);
 
     public String typeName;
     public boolean isStatic;

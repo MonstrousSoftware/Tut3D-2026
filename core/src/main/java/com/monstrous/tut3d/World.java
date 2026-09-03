@@ -24,6 +24,7 @@ public class World implements Disposable {
     private final PlayerController playerController;
     private final PhysicsRayCaster rayCaster;
     public final GameStats stats;
+    public final WeaponState weaponState = new WeaponState();
 
     public World() {
 
@@ -33,7 +34,7 @@ public class World implements Disposable {
         physicsWorld = new PhysicsWorld(this);
         rayCaster = new PhysicsRayCaster(physicsWorld);
         factory = new PhysicsBodyFactory(physicsWorld);
-        playerController = new PlayerController(rayCaster);
+        playerController = new PlayerController(this, rayCaster);
         stats = new GameStats();
     }
 
@@ -47,6 +48,7 @@ public class World implements Disposable {
         player = null;
         isDirty = true;
         stats.reset();
+        weaponState.reset();
     }
 
     public void setPlayer(GameObject go){
@@ -118,14 +120,25 @@ public class World implements Disposable {
     public void shoot() {
         if(player.isDead())
             return;
-        dir.set( playerController.getViewingDirection() );
-        spawnPos.set(dir);
-        spawnPos.add(player.getPosition()); // spawn from 1 unit in front of the player
-        GameObject ball = spawnObject(GameObjectType.TYPE_FRIENDLY_BULLET, "ball", null, CollisionShapeType.SPHERE, true, spawnPos, Settings.ballMass );
-        shootDirection.set(dir);        // shoot forward
-        shootDirection.y += 0.5f;       // and slightly up
-        shootDirection.scl(Settings.ballForce);   // scale for speed
-        ball.body.applyForce(shootDirection);
+        if(!weaponState.isWeaponReady())  // to give delay between shots
+            return;
+        weaponState.firing = true;    // set state to firing (triggers gun animation in GameScreen)
+
+        switch(weaponState.currentWeaponType) {
+            case BALL:
+                dir.set(playerController.getViewingDirection());
+                spawnPos.set(dir);
+                spawnPos.add(player.getPosition()); // spawn from 1 unit in front of the player
+                GameObject ball = spawnObject(GameObjectType.TYPE_FRIENDLY_BULLET, "ball", null, CollisionShapeType.SPHERE, true, spawnPos, Settings.ballMass);
+                shootDirection.set(dir);        // shoot forward
+                shootDirection.y += 0.5f;       // and slightly up
+                shootDirection.scl(Settings.ballForce);   // scale for speed
+                ball.body.applyForce(shootDirection);
+                break;
+            case GUN:
+                Main.assets.sounds.GUN_SHOT.play();
+                break;
+        }
     }
 
     public void update( float deltaTime ) {
@@ -138,6 +151,7 @@ public class World implements Disposable {
         }
         if(player.isDead())
             return;
+        weaponState.update(deltaTime);
         playerController.update(player, deltaTime);
         for(GameObject go : gameObjects)
             go.update(this, deltaTime);
@@ -210,6 +224,10 @@ public class World implements Disposable {
         else if(pickup.type == GameObjectType.TYPE_PICKUP_HEALTH) {
             character.health = Math.min(character.health + 0.5f, 1f);
             System.out.println("Player health: "+100f*player.health+" %");
+            Main.assets.sounds.UPGRADE.play();
+        } else if(pickup.type == GameObjectType.TYPE_PICKUP_GUN) {
+            weaponState.haveGun = true;
+            weaponState.currentWeaponType = WeaponType.GUN;
             Main.assets.sounds.UPGRADE.play();
         }
         removeObject(pickup);

@@ -7,6 +7,7 @@ import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.IntIntMap;
 import com.monstrous.tut3d.GameObject;
 import com.monstrous.tut3d.Settings;
+import com.monstrous.tut3d.World;
 import com.monstrous.tut3d.physics.PhysicsRayCaster;
 
 public class PlayerController extends InputAdapter {
@@ -18,6 +19,8 @@ public class PlayerController extends InputAdapter {
     public int turnRightKey = Input.Keys.E;
     public int jumpKey = Input.Keys.SPACE;
     public int runShiftKey = Input.Keys.SHIFT_LEFT;
+    public int switchWeaponKey = Input.Keys.TAB;
+
 
     private final IntIntMap keys = new IntIntMap();
     private final Vector3 linearForce;
@@ -30,8 +33,10 @@ public class PlayerController extends InputAdapter {
     private final Vector3 tmp2 = new Vector3();
     private final Vector3 tmp3 = new Vector3();
     private final Vector3 groundNormal;
+    private final World world;
 
-    public PlayerController(PhysicsRayCaster rayCaster)  {
+    public PlayerController(World world, PhysicsRayCaster rayCaster)  {
+        this.world = world;
         this.rayCaster = rayCaster;
         linearForce = new Vector3();
         forwardDirection = new Vector3();
@@ -62,6 +67,8 @@ public class PlayerController extends InputAdapter {
     @Override
     public boolean keyUp (int keycode) {
         keys.remove(keycode, 0);
+        if (keycode == switchWeaponKey)             // switch weapons on key release
+            world.weaponState.switchWeapon();
         return true;
     }
 
@@ -104,6 +111,14 @@ public class PlayerController extends InputAdapter {
         tmp.set(forwardDirection).crs(Vector3.Y);   // cross product
         tmp.scl(distance);
         linearForce.add(tmp);
+    }
+
+    @Override
+    public boolean touchDown(int screenX, int screenY, int pointer, int button) {
+        if(button == Input.Buttons.LEFT) {
+            world.shoot();
+        }
+        return false;
     }
 
     public void update (GameObject player, float deltaTime ) {

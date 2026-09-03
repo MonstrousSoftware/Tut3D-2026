@@ -1,6 +1,8 @@
 package com.monstrous.tut3d;
 
 
+import com.badlogic.gdx.math.Vector3;
+
 public class Settings {
     static public final String GLTF_FILE = "models/step12.gltf";
 
@@ -32,5 +34,8 @@ public class Settings {
     static public float playerAngularDamping = 0.5f;
 
     static public final int shadowMapSize = 4096;
+
+    static public Vector3 gunPosition = new Vector3(-1.1f, 1.1f, 1.8f); // gun position in gun camera view
+    static public float gunScale = 3.0f;
 
 }

@@ -29,7 +29,9 @@ public class Populator {
         world.spawnObject(GameObjectType.TYPE_ENEMY, "cook",  "cookProxy", CollisionShapeType.CAPSULE, true, new Vector3(-25, 1f, 25), Settings.playerMass  );  // bad guy
         world.spawnObject(GameObjectType.TYPE_ENEMY, "cook",  "cookProxy", CollisionShapeType.CAPSULE, true, new Vector3(25, 1f, 25), Settings.playerMass  );  // bad guy
 
-        GameObject player = world.spawnObject(GameObjectType.TYPE_PLAYER, "ducky",null, CollisionShapeType.CAPSULE, true, new Vector3(0,1,0), Settings.playerMass);
+        world.spawnObject(GameObjectType.TYPE_PICKUP_GUN, "GunArmature",  null, CollisionShapeType.SPHERE, true, new Vector3(0,0.3f, 0), 5);
+
+        GameObject player = world.spawnObject(GameObjectType.TYPE_PLAYER, "ducky",null, CollisionShapeType.CAPSULE, true, new Vector3(5,1,5), Settings.playerMass);
         world.setPlayer(player);
     }
 }
