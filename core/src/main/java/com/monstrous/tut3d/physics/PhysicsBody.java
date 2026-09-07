@@ -17,6 +17,7 @@ public class PhysicsBody {
     private final Vector3 position;               // for convenience, matches geom.getPosition() but converted to Vector3
     private final Quaternion quaternion;          // for convenience, matches geom.getQuaternion() but converted to LibGDX Quaternion
     public final ModelInstance debugInstance;    // visualisation of collision shape for debug view
+    private final Vector3 linearVelocity = new Vector3();
 
     public PhysicsBody(DGeom geom, ModelInstance debugInstance) {
         this.geom = geom;
@@ -79,6 +80,17 @@ public class PhysicsBody {
         if(rigidBody != null)
             rigidBody.setQuaternion(odeQ);
     }
+
+    public Vector3 getVelocity() {
+        DBody rigidBody = geom.getBody();
+        if(rigidBody != null) {
+            DVector3C v = geom.getBody().getLinearVel();
+            linearVelocity.set((float) v.get0(), (float) v.get1(), (float) v.get2());
+        } else
+            linearVelocity.set(Vector3.Zero);
+        return linearVelocity;
+    }
+
 
     public void applyForce( Vector3 force ){
         DBody rigidBody = geom.getBody();

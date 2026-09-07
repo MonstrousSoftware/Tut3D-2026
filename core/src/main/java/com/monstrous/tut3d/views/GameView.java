@@ -30,6 +30,7 @@ public class GameView implements Disposable {
     public CamController camController;
     private boolean isOverlay;
     private float bobScale;
+    private float bobAngle;
 
     public GameView(World world, boolean overlay, float near, float far, float bobScale) {
         this.world = world;
@@ -104,10 +105,9 @@ public class GameView implements Disposable {
         }
     }
 
-    public void render(float delta ) {
+    public void render(float delta, float speed ) {
 
-//        if(!isOverlay)
-//            camController.update(world.player.getPosition(), world.getPlayerController().getViewingDirection());
+        addHeadBob(delta, speed);
         cam.update();
         if(world.isDirty())
             refresh();
@@ -117,6 +117,14 @@ public class GameView implements Disposable {
         // render
         Gdx.gl.glClear(GL20.GL_DEPTH_BUFFER_BIT);   // clear depth buffer only
         sceneManager.render();
+    }
+
+    private void addHeadBob(float deltaTime, float speed ) {
+        if( speed > 0.1f ) {
+            bobAngle += speed * deltaTime * 0.5f * (float)Math.PI / Settings.headBobDuration;
+            // move the head up and down in a sine wave
+            cam.position.y +=  bobScale *  Settings.headBobHeight * (float)Math.sin(bobAngle);
+        }
     }
 
     public void resize(int width, int height){

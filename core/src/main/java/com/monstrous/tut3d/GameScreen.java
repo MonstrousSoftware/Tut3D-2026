@@ -101,7 +101,8 @@ public class GameScreen extends ScreenAdapter {
         gameView.camController.update(world.player.getPosition(), world.getPlayerController().getViewingDirection());
 
         world.update(delta);
-        gameView.render(delta);
+        float moveSpeed = world.player.body.getVelocity().len();
+        gameView.render(delta, moveSpeed);
         if(debugRender) {
             physicsView.render(gameView.getCamera());
             gridView.render(gameView.getCamera());
@@ -113,7 +114,7 @@ public class GameScreen extends ScreenAdapter {
             scopeOverlay.startRecoilEffect();
         }
         if(!thirdPersonView && world.weaponState.currentWeaponType == WeaponType.GUN &&!lookThroughScope) {
-            gunView.render(delta);
+            gunView.render(delta, moveSpeed);
         }
         if(lookThroughScope)
             scopeOverlay.render(delta);
