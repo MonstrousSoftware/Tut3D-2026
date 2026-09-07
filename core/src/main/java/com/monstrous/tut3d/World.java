@@ -8,6 +8,8 @@ import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Disposable;
 import com.monstrous.tut3d.behaviours.CookBehaviour;
 import com.monstrous.tut3d.inputs.PlayerController;
+import com.monstrous.tut3d.nav.NavMesh;
+import com.monstrous.tut3d.nav.NavMeshBuilder;
 import com.monstrous.tut3d.physics.*;
 import net.mgsx.gltf.loaders.gltf.GLTFLoader;
 import net.mgsx.gltf.scene3d.scene.Scene;
@@ -22,6 +24,7 @@ public class World implements Disposable {
     private final PhysicsWorld physicsWorld;
     private final PhysicsBodyFactory factory;
     private final PlayerController playerController;
+    public NavMesh navMesh;
     public final PhysicsRayCaster rayCaster;
     public final GameStats stats;
     public final WeaponState weaponState = new WeaponState();
@@ -36,6 +39,7 @@ public class World implements Disposable {
         factory = new PhysicsBodyFactory(physicsWorld);
         playerController = new PlayerController(this, rayCaster);
         stats = new GameStats();
+        navMesh = null;
     }
 
     public boolean isDirty(){
@@ -74,6 +78,10 @@ public class World implements Disposable {
         if(proxyName != null) {
             Scene proxyScene = loadNode( proxyName, resetPosition, position );
             collisionInstance = proxyScene.modelInstance;
+        }
+        if(type == GameObjectType.TYPE_NAVMESH){
+            navMesh = NavMeshBuilder.build(scene.modelInstance);
+            return null;
         }
 
         PhysicsBody body = factory.createBody(collisionInstance, shapeType, mass, type.isStatic);

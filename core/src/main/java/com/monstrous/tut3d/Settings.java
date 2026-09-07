@@ -4,7 +4,7 @@ package com.monstrous.tut3d;
 import com.badlogic.gdx.math.Vector3;
 
 public class Settings {
-    static public final String GLTF_FILE = "models/step12.gltf";
+    static public final String GLTF_FILE = "models/step12nav.gltf";
 
     static public float eyeHeight = 1.5f;   // meters
 
@@ -13,6 +13,9 @@ public class Settings {
     static public float turnSpeed = 120f;   // degrees/s
     static public float jumpForce = 10f;
 
+    static public float cookForce = 8f; // force on cook to move, determines walk speed
+
+
     static public boolean invertLook = false;
     static public boolean freeLook = true;
     static public float headBobDuration = 0.6f; // s
@@ -20,6 +23,8 @@ public class Settings {
     static public float degreesPerPixel = 0.1f; // mouse sensitivity
 
     static public float groundRayLength = 1.2f;
+    static public float navHeight = 1.6f;       // should be about half the height of the characters
+
 
     static public float gravity = -30f;
 

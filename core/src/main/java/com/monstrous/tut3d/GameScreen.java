@@ -9,6 +9,7 @@ import com.badlogic.gdx.graphics.*;
 import com.badlogic.gdx.math.Vector3;
 import com.monstrous.tut3d.gui.GUI;
 import com.monstrous.tut3d.inputs.MyControllerAdapter;
+import com.monstrous.tut3d.nav.NavMeshView;
 import com.monstrous.tut3d.physics.CollisionShapeType;
 import com.monstrous.tut3d.views.GameView;
 import com.monstrous.tut3d.views.GridView;
@@ -20,6 +21,7 @@ public class GameScreen extends ScreenAdapter {
     private GridView gridView;
     private PhysicsView physicsView;
     private ScopeOverlay scopeOverlay;
+    private NavMeshView navMeshView;
     private GUI gui;
     private GameView gunView;
     private World gunWorld;
@@ -28,6 +30,7 @@ public class GameScreen extends ScreenAdapter {
     private boolean lookThroughScope = false;
     private boolean debugRender = false;
     private int windowedWidth, windowedHeight;
+    private boolean navScreen = false;
 
     @Override
     public void show() {
@@ -37,6 +40,7 @@ public class GameScreen extends ScreenAdapter {
         gameView = new GameView(world,false, 0.1f, 300f, 1f);
         physicsView = new PhysicsView(world);
         gridView = new GridView();
+        navMeshView = new NavMeshView();
         gameView.camController.setThirdPersonMode(thirdPersonView);
         world.player.visible = thirdPersonView;            // hide player mesh in first person
 
@@ -109,6 +113,8 @@ public class GameScreen extends ScreenAdapter {
             world.player.visible = thirdPersonView;            // hide player mesh in first person
             gameView.refresh();
         }
+        if (Gdx.input.isKeyJustPressed(Input.Keys.F3) )
+            navScreen = !navScreen;
         if(Gdx.input.isKeyJustPressed(Input.Keys.F11))
             toggleFullScreen();
 
@@ -132,6 +138,11 @@ public class GameScreen extends ScreenAdapter {
         }
         if(lookThroughScope)
             scopeOverlay.render(delta);
+
+        if(navScreen) {
+            navMeshView.update(world);
+            navMeshView.render(gameView.getCamera());
+        }
         gui.showCrossHair( !gameView.inThirdPersonMode() );
         gui.render(delta);
     }
@@ -160,5 +171,6 @@ public class GameScreen extends ScreenAdapter {
         world.dispose();
         gui.dispose();
         scopeOverlay.dispose();
+        navMeshView.dispose();
     }
 }
