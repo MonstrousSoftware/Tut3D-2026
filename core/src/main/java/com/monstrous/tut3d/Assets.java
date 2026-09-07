@@ -40,6 +40,7 @@ public class Assets implements Disposable {
     public Skin skin;
     public BitmapFont uiFont;
     public SceneAsset sceneAsset;
+    public Texture scopeImage;
 
     private AssetManager assets;
 
@@ -62,6 +63,7 @@ public class Assets implements Disposable {
         assets.load("sound/secret1.ogg", Sound.class);
         assets.load("sound/upgrade1.ogg", Sound.class);
         assets.load("sound/9mm-pistol-shoot-short-reverb-7152.mp3", Sound.class);
+        assets.load("images/scope.png", Texture.class);
     }
 
     public void finishLoading() {
@@ -74,6 +76,7 @@ public class Assets implements Disposable {
         skin = assets.get("ui/uiskin.json");
         uiFont = assets.get("font/Amble-Regular-26.fnt");
         sceneAsset = assets.get(Settings.GLTF_FILE);
+        scopeImage = assets.get("images/scope.png");
     }
 
     public <T> T get(String name ) {
