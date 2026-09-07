@@ -26,8 +26,8 @@ public class GameScreen extends ScreenAdapter {
     private GameObject gun;
     private boolean thirdPersonView = false;
     private boolean lookThroughScope = false;
-
     private boolean debugRender = false;
+    private int windowedWidth, windowedHeight;
 
     @Override
     public void show() {
@@ -82,6 +82,18 @@ public class GameScreen extends ScreenAdapter {
             gameView.setFieldOfView(67f);
     }
 
+    private void toggleFullScreen() {        // toggle full screen / windowed screen
+        if (!Gdx.graphics.isFullscreen()) {
+            windowedWidth = Gdx.graphics.getWidth();        // remember current width & height
+            windowedHeight = Gdx.graphics.getHeight();
+            Gdx.graphics.setFullscreenMode(Gdx.graphics.getDisplayMode());
+            resize(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+        } else {
+            Gdx.graphics.setWindowedMode(windowedWidth, windowedHeight);
+            resize(windowedWidth, windowedHeight);
+        }
+    }
+
     @Override
     public void render(float delta) {
         setScopeMode(world.weaponState.scopeMode);
@@ -97,6 +109,8 @@ public class GameScreen extends ScreenAdapter {
             world.player.visible = thirdPersonView;            // hide player mesh in first person
             gameView.refresh();
         }
+        if(Gdx.input.isKeyJustPressed(Input.Keys.F11))
+            toggleFullScreen();
 
         gameView.camController.update(world.player.getPosition(), world.getPlayerController().getViewingDirection());
 
