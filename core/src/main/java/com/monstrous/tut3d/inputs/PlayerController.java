@@ -3,6 +3,7 @@ package com.monstrous.tut3d.inputs;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.InputAdapter;
+import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.IntIntMap;
 import com.monstrous.tut3d.GameObject;
@@ -28,6 +29,9 @@ public class PlayerController extends InputAdapter {
     private final Vector3 viewingDirection;   // look direction, is forwardDirection plus Y component
     private float mouseDeltaX;
     private float mouseDeltaY;
+    private final Vector2 stickMove = new Vector2();
+    private final Vector2 stickLook = new Vector2();
+    private float stickViewAngle; // angle up or down
     private final PhysicsRayCaster rayCaster;
     private final Vector3 tmp = new Vector3();
     private final Vector3 tmp2 = new Vector3();
@@ -114,6 +118,12 @@ public class PlayerController extends InputAdapter {
         linearForce.add(tmp);
     }
 
+    public void fireWeapon() {
+        world.rayCaster.findTarget(world.player.getPosition(), viewingDirection, hitPoint);
+        world.shoot(  viewingDirection, hitPoint );
+    }
+
+
     @Override
     public boolean touchDown(int screenX, int screenY, int pointer, int button) {
         if(button == Input.Buttons.LEFT) {
@@ -138,6 +148,22 @@ public class PlayerController extends InputAdapter {
         mouseDeltaX = -Gdx.input.getDeltaX() * Settings.degreesPerPixel*0.2f;
         mouseDeltaY = -Gdx.input.getDeltaY() * Settings.degreesPerPixel*0.2f;
         return false;
+    }
+
+    public void stickMoveX(float value){
+        stickMove.x = value;
+    }
+
+    public void stickMoveY(float value){
+        stickMove.y = value;
+    }
+
+    public void stickLookX(float value){
+        stickLook.x = value;
+    }
+
+    public void stickLookY(float value){
+        stickLook.y = value;
     }
 
     public void update (GameObject player, float deltaTime ) {
@@ -166,6 +192,24 @@ public class PlayerController extends InputAdapter {
         rotateView(mouseDeltaX*deltaTime*Settings.turnSpeed, mouseDeltaY*deltaTime*Settings.turnSpeed );
         mouseDeltaX = 0;
         mouseDeltaY = 0;
+
+        // controller stick inputs
+        moveForward(stickMove.y*deltaTime * moveSpeed);
+        strafe(stickMove.x * deltaTime * Settings.walkSpeed);
+        float delta = 0;
+        float speedFactor;
+        if(world.weaponState.scopeMode) {
+            speedFactor = 0.2f;
+            delta = (stickLook.y * 30f );
+        }
+        else {
+            speedFactor = 1f;
+            delta = (stickLook.y * 90f - stickViewAngle);
+        }
+        delta *= deltaTime*4f*speedFactor;
+        stickViewAngle += delta;
+        rotateView(stickLook.x * deltaTime * Settings.turnSpeed*speedFactor,  delta );
+
 
         // note: most of the following is only valid when on ground, but we leave it to allow some fun cheating
         if (keys.containsKey(forwardKey))

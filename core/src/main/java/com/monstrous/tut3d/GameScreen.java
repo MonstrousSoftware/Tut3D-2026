@@ -4,9 +4,11 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.InputMultiplexer;
 import com.badlogic.gdx.ScreenAdapter;
+import com.badlogic.gdx.controllers.Controllers;
 import com.badlogic.gdx.graphics.*;
 import com.badlogic.gdx.math.Vector3;
 import com.monstrous.tut3d.gui.GUI;
+import com.monstrous.tut3d.inputs.MyControllerAdapter;
 import com.monstrous.tut3d.physics.CollisionShapeType;
 import com.monstrous.tut3d.views.GameView;
 import com.monstrous.tut3d.views.GridView;
@@ -49,6 +51,11 @@ public class GameScreen extends ScreenAdapter {
         // create an overlay view and add gun model
         gunView = new GameView(gunWorld, true, 0.01f, 10f, 0.1f);
         scopeOverlay = new ScopeOverlay();
+
+        if (Controllers.getCurrent() != null) {
+            MyControllerAdapter controllerAdapter = new MyControllerAdapter(world.getPlayerController(), this);
+            Controllers.addListener(controllerAdapter);
+        }
 
         InputMultiplexer im = new InputMultiplexer();
         Gdx.input.setInputProcessor(im);
