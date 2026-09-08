@@ -53,7 +53,7 @@ public class GameScreen extends ScreenAdapter {
         gun.scene.modelInstance.transform.setTranslation(Settings.gunPosition);
 
         // create an overlay view and add gun model
-        gunView = new GameView(gunWorld, true, 0.01f, 10f, 0.1f);
+        gunView = new GameView(gunWorld, true, 0.01f, 10f, 1.0f);
         scopeOverlay = new ScopeOverlay();
 
         if (Controllers.getCurrent() != null) {
@@ -134,6 +134,7 @@ public class GameScreen extends ScreenAdapter {
             scopeOverlay.startRecoilEffect();
         }
         if(!thirdPersonView && world.weaponState.currentWeaponType == WeaponType.GUN &&!lookThroughScope) {
+            gunView.getCamera().position.y = Settings.eyeHeight; // reset camera height
             gunView.render(delta, moveSpeed);
         }
         if(lookThroughScope)
