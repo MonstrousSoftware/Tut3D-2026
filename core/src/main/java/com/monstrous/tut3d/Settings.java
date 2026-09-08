@@ -4,7 +4,7 @@ package com.monstrous.tut3d;
 import com.badlogic.gdx.math.Vector3;
 
 public class Settings {
-    static public final String GLTF_FILE = "models/step12nav.gltf";
+    static public final String GLTF_FILE = "models/step21.gltf";
 
     static public float eyeHeight = 1.5f;   // meters
 
