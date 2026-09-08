@@ -11,7 +11,7 @@ public class Settings {
     static public float walkSpeed = 5f;    // m/s
     static public float runFactor = 3f;    // m/s
     static public float turnSpeed = 120f;   // degrees/s
-    static public float jumpForce = 10f;
+    static public float jumpForce = 30f;
 
     static public float cookForce = 8f; // force on cook to move, determines walk speed
 
@@ -26,7 +26,7 @@ public class Settings {
     static public float navHeight = 1.6f;       // should be about half the height of the characters
 
 
-    static public float gravity = -30f;
+    static public float gravity = -10f;
 
     static public float ballMass = 0.2f;
     static public float ballForce = 300f;
@@ -36,7 +36,7 @@ public class Settings {
 
     static public float gunForce = 200f;
 
-    static public float playerMass = 1f;
+    static public float playerMass = 0.8f;
     static public float playerLinearDamping = 0.05f;
     static public float playerAngularDamping = 0.5f;
 
